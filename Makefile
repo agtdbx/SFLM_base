@@ -18,14 +18,7 @@ EXEC_WINDOWS = $(EXEC_DIR_WINDOWS)$(NAME).exe
 INCLUDES = -I SFML_linux/include -I includes
 
 #=================================SOURCE FILES=================================#
-SRCS =	srcs/Map.cpp \
-		srcs/main.cpp \
-		srcs/Menu.cpp \
-		srcs/Game.cpp \
-		srcs/Chunk.cpp \
-		srcs/Button.cpp \
-		srcs/Camera.cpp \
-		srcs/Fonctions.cpp
+SRCS =	srcs/main.cpp
 
 #====================================OBJECTS===================================#
 OBJS = ${SRCS:.cpp=.o}
