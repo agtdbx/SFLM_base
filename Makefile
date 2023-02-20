@@ -7,7 +7,7 @@ LIBFSMLFLAG = -L SFML_linux/lib -lsfml-graphics -lsfml-window -lsfml-system
 LIBFSMLFLAGWINDOWS = -L SFML_windows/lib -lsfml-graphics -lsfml-window -lsfml-system
 
 #==================================EXECUTABLE==================================#
-NAME = test
+NAME = minigame
 EXEC_DIR_LINUX = linux_executable/
 EXEC_LINUX = $(EXEC_DIR_LINUX)$(NAME)
 
@@ -18,7 +18,14 @@ EXEC_WINDOWS = $(EXEC_DIR_WINDOWS)$(NAME).exe
 INCLUDES = -I SFML_linux/include -I includes
 
 #=================================SOURCE FILES=================================#
-SRCS =	srcs/main.cpp
+SRCS =	srcs/Map.cpp \
+		srcs/main.cpp \
+		srcs/Menu.cpp \
+		srcs/Game.cpp \
+		srcs/Chunk.cpp \
+		srcs/Button.cpp \
+		srcs/Camera.cpp \
+		srcs/Fonctions.cpp
 
 #====================================OBJECTS===================================#
 OBJS = ${SRCS:.cpp=.o}
@@ -83,8 +90,12 @@ re :
 
 run: $(EXEC_LINUX)
 	@echo "$(BLUE)Launch game$(NOC)"
-	@export LD_LIBRARY_PATH=SFML_linux/lib/ && $(EXEC_LINUX)
+	@export LD_LIBRARY_PATH=../SFML_linux/lib/ && cd $(EXEC_DIR_LINUX) && ./$(NAME)
 	@echo "$(GREEN)Have a nice day :)$(NOC)"
+
+runval: $(EXEC_LINUX)
+	@echo "$(BLUE)Debug$(NOC)"
+	@export LD_LIBRARY_PATH=SFML_linux/lib/ && valgrind $(EXEC_LINUX)
 
 create_progressbar:
 	@echo '#include <stdio.h>' > .progressbar.cpp
@@ -130,9 +141,9 @@ win :
 	g++ -static $(SRCS) $(INCLUDES) $(LIBFSMLFLAGWINDOWS) -o $(EXEC_WINDOWS)
 
 winrun :
-	$(EXEC_WINDOWS)
+	cd $(EXEC_DIR_WINDOWS) && $(NAME).exe
 
 linux-win :
 	x86_64-w64-mingw32-g++ -static $(SRCS) $(INCLUDES) $(LIBFSMLFLAGWINDOWS) -o $(EXEC_WINDOWS)
 
-.PHONY: all clean fclean re run create_progressbar
+.PHONY : all clean fclean re run runval create_progressbar win winrun linux-win
