@@ -1,65 +1,111 @@
-MAKEFLAGS = --no-print-directory
+MAKEFLAGS		:=	--no-print-directory
+.DEFAULT_GOAL	:=	all
+
+.DELETE_ON_ERROR:
+.SECONDEXPANSION:
+
+UNAME	:=	$(shell uname)
+
+ifneq ($(UNAME), Linux)
+WIN	:=	42
+endif
 
 #=================================COMPILATION==================================#
-CC = g++
-CPPFLAGS =
-LIBFSMLFLAG = -L SFML_linux/lib -lsfml-graphics -lsfml-window -lsfml-system
-LIBFSMLFLAGWINDOWS = -L SFML_windows/lib -lsfml-graphics -lsfml-window -lsfml-system
 
-#==================================EXECUTABLE==================================#
-NAME = minigame
-EXEC_DIR_LINUX = linux_executable/
-EXEC_LINUX = $(EXEC_DIR_LINUX)$(NAME)
+CC					:=	g++
+CPPFLAGS			:=	-MP -MMD -I SFML_linux/include -I includes
+LIBFSMLFLAG			:=	-L SFML_linux/lib -lsfml-graphics -lsfml-window -lsfml-system
+LIBFSMLFLAGWINDOWS	:=	-L SFML_windows/lib -lsfml-graphics -lsfml-window -lsfml-system
 
-EXEC_DIR_WINDOWS = windows_executable/
-EXEC_WINDOWS = $(EXEC_DIR_WINDOWS)$(NAME).exe
+#=====================================NAME=====================================#
+NAME	:=	base
 
-#===================================INCLUDES===================================#
-INCLUDES = -I SFML_linux/include -I includes
+#==================================DIRECTORIES=================================#
+BUILD				:= build
 
-#=================================SOURCE FILES=================================#
-SRCS =	srcs/main.cpp
+EXEC_DIR_LINUX		:=	linux_executable/
+EXEC_LINUX			:=	$(EXEC_DIR_LINUX)$(NAME)
 
-#====================================OBJECTS===================================#
-OBJS = ${SRCS:.cpp=.o}
+EXEC_DIR_WINDOWS	:=	windows_executable/
+EXEC_WINDOWS		:=	$(EXEC_DIR_WINDOWS)$(NAME).exe
+
+#====================================TARGETS===================================#
+SRCS	:=	srcs/main.cpp
+
+OBJS 	:=	${SRCS:srcs/%.cpp=$(BUILD)/%.o}
+DEPS	:=	$(SRCS:srcs/%.cpp=$(BUILD)/%.d)
+DIRS	:=	$(BUILD)
 
 #====================================COLORS====================================#
-NOC			= \033[0m
-BOLD		= \033[1m
-UNDERLINE	= \033[4m
-BLINK		= \e[5m
-BLACK		= \033[1;30m
-RED			= \e[1m;31m;
-GREEN		= \e[1m;32m;
-YELLOW		= \e[1m;33m;
-RED			= \e[1m\e[38;5;196m
-GREEN		= \e[1m\e[38;5;76m
-YELLOW		= \e[1m\e[38;5;220m
-BLUE		= \e[1m\e[38;5;33m
-VIOLET		= \033[1;35m
-CYAN		= \033[1;36m
-WHITE		= \033[1;37m
+NOC			:=	\033[0m
+BOLD		:=	\033[1m
+UNDERLINE	:=	\033[4m
+BLINK		:=	\e[5m
+BLACK		:=	\033[1;30m
+RED			:=	\e[1m;31m;
+GREEN		:=	\e[1m;32m;
+YELLOW		:=	\e[1m;33m;
+RED			:=	\e[1m\e[38;5;196m
+GREEN		:=	\e[1m\e[38;5;76m
+YELLOW		:=	\e[1m\e[38;5;220m
+BLUE		:=	\e[1m\e[38;5;33m
+VIOLET		:=	\033[1;35m
+CYAN		:=	\033[1;36m
+WHITE		:=	\033[1;37m
 
-#==============================PROGRESS BAR UTILS==============================#
-PERCENT = 0
-NB_COMPIL = 0
-TOTAL_COMPIL = $(words $(OBJS))
-PROGRESS_BAR_DETAIL = 5
+#=================================COUNTER UTILS================================#
+NB_COMPIL		:=	0
+TOTAL_COMPIL	:=	$(words $(OBJS))
 
 #=====================================RULES====================================#
-%.o : %.cpp
+$(DIRS):
+	@mkdir $@
+
+ifdef WIN
+
+$(OBJS) : $(BUILD)/%.o : srcs/%.cpp | $$(@D)
+	@echo Compiling $<
+	@$(CC) $(CPPFLAGS) -c $< -o $@
+
+$(EXEC_WINDOWS): $(OBJS)
+	@echo Creation of binary
+	@g++ $^ $(LIBFSMLFLAGWINDOWS) -o $(EXEC_WINDOWS)
+	@echo Done
+
+all : $(EXEC_WINDOWS)
+
+clean :
+	@echo Deleting objects
+	@rmdir /s /q $(BUILD)
+
+fclean : clean
+	@echo Deleting binary
+
+re : fclean all
+
+run: $(EXEC_WINDOWS)
+	@echo Launch game
+	@cd $(EXEC_DIR_WINDOWS) && $(NAME).exe
+	@echo Have a nice day :)
+
+
+win :
+	g++ -static $(SRCS) $(CPPFLAGS) $(LIBFSMLFLAGWINDOWS) -o $(EXEC_WINDOWS)
+
+winrun :
+	cd $(EXEC_DIR_WINDOWS) && $(NAME).exe
+
+.PHONY : all clean fclean re run win winrun
+
+else
+
+$(OBJS) : $(BUILD)/%.o : srcs/%.cpp | $$(@D)
 	$(if $(filter $(NB_COMPIL),0), @echo "$(BLUE)Compiling$(NOC)")
-	$(if $(filter $(NB_COMPIL),0), @echo "$(YELLOW)$(NB_COMPIL) 0%$(NOC)")
-	$(if $(filter $(NB_COMPIL),0), @make create_progressbar)
-	$(if $(filter $(NB_COMPIL),0), @@./.progressbar 0)
 	$(eval NB_COMPIL=$(shell echo $$(($(NB_COMPIL)+1))))
-	$(eval PERCENT=$(shell echo $$(($(NB_COMPIL) * 100 / $(TOTAL_COMPIL)))))
-	@$(CC) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
-	@./.progressbar $(PERCENT)
+	@echo "$(WHITE)[$(NB_COMPIL)/$(TOTAL_COMPIL)] $(VIOLET)Compiling $< $(NOC)"
+	@$(CC) $(CPPFLAGS) -c $< -o $@
 
 $(EXEC_LINUX): $(OBJS)
-	@./.progressbar 100
-	@rm .progressbar
 	@echo "$(BLUE)Creation of binary$(NOC)"
 	@mkdir $(EXEC_DIR_LINUX) 2>/dev/null || echo -n
 	@g++ $^ $(LIBFSMLFLAG) -o $(EXEC_LINUX)
@@ -69,7 +115,7 @@ all : $(EXEC_LINUX)
 
 clean :
 	@echo "$(RED)Deleting objects$(NOC)"
-	@rm -f $(OBJS)
+	@rm -rf $(BUILD) 2>/dev/null || echo -n
 
 fclean : clean
 	@echo "$(RED)Deleting binary$(NOC)"
@@ -79,7 +125,7 @@ fclean : clean
 re :
 	@clear
 	@make fclean
-	@make $(EXEC_LINUX)
+	@make
 
 run: $(EXEC_LINUX)
 	@echo "$(BLUE)Launch game$(NOC)"
@@ -90,53 +136,11 @@ runval: $(EXEC_LINUX)
 	@echo "$(BLUE)Debug$(NOC)"
 	@export LD_LIBRARY_PATH=SFML_linux/lib/ && valgrind $(EXEC_LINUX)
 
-create_progressbar:
-	@echo '#include <stdio.h>' > .progressbar.cpp
-	@echo '#include <stdlib.h>\n' >> .progressbar.cpp
-	@echo 'void	print_color(int color)' >> .progressbar.cpp
-	@echo '{' >> .progressbar.cpp
-	@echo '	if (color == -1)' >> .progressbar.cpp
-	@echo '		printf("\\e[0m ");' >> .progressbar.cpp
-	@echo '	else if (color == 0)' >> .progressbar.cpp
-	@echo '		printf("\\e[48;5;154m ");' >> .progressbar.cpp
-	@echo '	else if (color == 1 || color == 9)' >> .progressbar.cpp
-	@echo '		printf("\\e[48;5;155m ");' >> .progressbar.cpp
-	@echo '	else if (color == 2 || color == 8)' >> .progressbar.cpp
-	@echo '		printf("\\e[48;5;156m ");' >> .progressbar.cpp
-	@echo '	else if (color == 3 || color == 7)' >> .progressbar.cpp
-	@echo '		printf("\\e[48;5;157m ");' >> .progressbar.cpp
-	@echo '	else if (color == 4 || color == 6)' >> .progressbar.cpp
-	@echo '		printf("\\e[48;5;158m ");' >> .progressbar.cpp
-	@echo '	else if (color == 5)' >> .progressbar.cpp
-	@echo '		printf("\\e[48;5;159m ");' >> .progressbar.cpp
-	@echo '}\n' >> .progressbar.cpp
-	@echo 'int	main(int ac, char **av)' >> .progressbar.cpp
-	@echo '{' >> .progressbar.cpp
-	@echo '	int	nb = atoi(av[1]);\n' >> .progressbar.cpp
-	@echo '	printf("\\e[1A\\e[K");' >> .progressbar.cpp
-	@echo '	for (int i = 0; i <= 100; i += $(PROGRESS_BAR_DETAIL))' >> .progressbar.cpp
-	@echo '	{' >> .progressbar.cpp
-	@echo '		if (i > nb)' >> .progressbar.cpp
-	@echo '			printf("\\e[48;5;196m ");' >> .progressbar.cpp
-	@echo '		else' >> .progressbar.cpp
-	@echo '			print_color((nb - (i / $(PROGRESS_BAR_DETAIL))) % 10);' >> .progressbar.cpp
-	@echo '	}' >> .progressbar.cpp
-	@echo '	print_color(-1);' >> .progressbar.cpp
-	@echo '	if (nb == 100)' >> .progressbar.cpp
-	@echo '		printf("\e[1m\e[38;5;76m100%%\\e[0m\\n");' >> .progressbar.cpp
-	@echo '	else' >> .progressbar.cpp
-	@echo '		printf("\e[1m\e[38;5;220m%i%%\\e[0m\\n", nb);' >> .progressbar.cpp
-	@echo '}' >> .progressbar.cpp
-	@$(CC) .progressbar.cpp -o .progressbar
-	@rm .progressbar.cpp
-
-win :
-	g++ -static $(SRCS) $(INCLUDES) $(LIBFSMLFLAGWINDOWS) -o $(EXEC_WINDOWS)
-
-winrun :
-	cd $(EXEC_DIR_WINDOWS) && $(NAME).exe
-
 linux-win :
-	x86_64-w64-mingw32-g++ -static $(SRCS) $(INCLUDES) $(LIBFSMLFLAGWINDOWS) -o $(EXEC_WINDOWS)
+	x86_64-w64-mingw32-g++ -static $(SRCS) $(CPPFLAGS) $(LIBFSMLFLAGWINDOWS) -o $(EXEC_WINDOWS)
 
-.PHONY : all clean fclean re run runval create_progressbar win winrun linux-win
+.PHONY : all clean fclean re run runval linux-win
+
+endif
+
+-include $(DEPS)
