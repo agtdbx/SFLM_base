@@ -11,6 +11,7 @@ WIN	:=	42
 endif
 
 #=================================COMPILATION==================================#
+<<<<<<< HEAD
 CC					:=	g++
 CPPFLAGS			:=	-MP -MMD -I SFML_linux/include -I includes -g3
 LIBFSMLFLAG			:=	-L SFML_linux/lib -lsfml-graphics -lsfml-window -lsfml-system
@@ -31,11 +32,35 @@ EXEC_WINDOWS		:=	$(EXEC_DIR_WINDOWS)$(NAME).exe
 #====================================TARGETS===================================#
 SRCS	:=	srcs/main.cpp
 
+=======
+
+CC					:=	g++
+CPPFLAGS			:=	-MP -MMD -I SFML_linux/include -I includes
+LIBFSMLFLAG			:=	-L SFML_linux/lib -lsfml-graphics -lsfml-window -lsfml-system
+LIBFSMLFLAGWINDOWS	:=	-L SFML_windows/lib -lsfml-graphics -lsfml-window -lsfml-system
+
+#=====================================NAME=====================================#
+NAME	:=	base
+
+#==================================DIRECTORIES=================================#
+BUILD				:= build
+
+EXEC_DIR_LINUX		:=	linux_executable/
+EXEC_LINUX			:=	$(EXEC_DIR_LINUX)$(NAME)
+
+EXEC_DIR_WINDOWS	:=	windows_executable/
+EXEC_WINDOWS		:=	$(EXEC_DIR_WINDOWS)$(NAME).exe
+
+#====================================TARGETS===================================#
+SRCS	:=	srcs/main.cpp
+
+>>>>>>> bbe836deffa791842676752676b95b12c85097e1
 OBJS 	:=	${SRCS:srcs/%.cpp=$(BUILD)/%.o}
 DEPS	:=	$(SRCS:srcs/%.cpp=$(BUILD)/%.d)
 DIRS	:=	$(BUILD)
 
 #====================================COLORS====================================#
+<<<<<<< HEAD
 NOC			= \033[0m
 BOLD		= \033[1m
 UNDERLINE	= \033[4m
@@ -63,6 +88,27 @@ endif
 ifndef TOTAL_COMPIL
 TOTAL_COMPIL		:=	$(words $(OBJS))
 endif
+=======
+NOC			:=	\033[0m
+BOLD		:=	\033[1m
+UNDERLINE	:=	\033[4m
+BLINK		:=	\e[5m
+BLACK		:=	\033[1;30m
+RED			:=	\e[1m;31m;
+GREEN		:=	\e[1m;32m;
+YELLOW		:=	\e[1m;33m;
+RED			:=	\e[1m\e[38;5;196m
+GREEN		:=	\e[1m\e[38;5;76m
+YELLOW		:=	\e[1m\e[38;5;220m
+BLUE		:=	\e[1m\e[38;5;33m
+VIOLET		:=	\033[1;35m
+CYAN		:=	\033[1;36m
+WHITE		:=	\033[1;37m
+
+#=================================COUNTER UTILS================================#
+NB_COMPIL		:=	0
+TOTAL_COMPIL	:=	$(words $(OBJS))
+>>>>>>> bbe836deffa791842676752676b95b12c85097e1
 
 #=====================================RULES====================================#
 $(DIRS):
@@ -108,7 +154,11 @@ else
 
 $(OBJS) : $(BUILD)/%.o : srcs/%.cpp | $$(@D)
 	$(if $(filter $(NB_COMPIL),0), @echo "$(BLUE)Compiling$(NOC)")
+<<<<<<< HEAD
 	$(eval NB_COMPIL=$(shell expr $(NB_COMPIL) + 1))
+=======
+	$(eval NB_COMPIL=$(shell echo $$(($(NB_COMPIL)+1))))
+>>>>>>> bbe836deffa791842676752676b95b12c85097e1
 	@echo "$(WHITE)[$(NB_COMPIL)/$(TOTAL_COMPIL)] $(VIOLET)Compiling $< $(NOC)"
 	@$(CC) $(CPPFLAGS) -c $< -o $@
 
@@ -141,7 +191,11 @@ run: $(EXEC_LINUX)
 
 runval: $(EXEC_LINUX)
 	@echo "$(BLUE)Debug$(NOC)"
+<<<<<<< HEAD
 	@export LD_LIBRARY_PATH=../SFML_linux/lib/ && cd $(EXEC_DIR_LINUX) && valgrind ./$(NAME)
+=======
+	@export LD_LIBRARY_PATH=SFML_linux/lib/ && valgrind $(EXEC_LINUX)
+>>>>>>> bbe836deffa791842676752676b95b12c85097e1
 
 linux-win :
 	x86_64-w64-mingw32-g++ -static $(SRCS) $(CPPFLAGS) $(LIBFSMLFLAGWINDOWS) -o $(EXEC_WINDOWS)
@@ -149,6 +203,11 @@ linux-win :
 .PHONY : all clean fclean re run runval linux-win
 
 endif
+<<<<<<< HEAD
 
 -include $(DEPS)
 
+=======
+
+-include $(DEPS)
+>>>>>>> bbe836deffa791842676752676b95b12c85097e1

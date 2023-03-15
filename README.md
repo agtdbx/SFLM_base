@@ -18,3 +18,5 @@ make run
 
 Windows :
 mingw32-make winrun
+OU
+Double clique sur le .exe dans windows_executable
