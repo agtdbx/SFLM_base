@@ -1,21 +1,30 @@
-# Projet
-Ceci est juste une base de projet C++ utilisant la SFML avec un moyen de le compiler sous Windows ou Linux
+# Project
+This is a base of game project with in c++ with SFML.
+
+# Setup
+This step isn't requiered if you already have openal.
+```bash
+make install
+```
+This step needed sudo permission.
+
+You may want to install more that just requiered to have lighter repo.
+```bash
+make fullinstall
+```
 
 # Compilation
-## Linux :
+```bash
 make
+```
 
-## Windows :
-mingw32-make win
+# Update
+In case of update of a dependency, you may do this command to have it.
+```bash
+make update
+```
 
-## .exe a partir d'un linux :
-make linux-win 
-
-# Lancement
-## Linux :
+# Running
+```bash
 make run
-
-## Windows :
-mingw32-make winrun
-OU
-Double clique sur le .exe dans windows_executable
+```

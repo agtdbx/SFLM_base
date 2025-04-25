@@ -1,0 +1,12 @@
+.vscode
+build
+builddir
+release
+subprojects/flac-*
+subprojects/freetype-*
+subprojects/libjson
+subprojects/libogg-*
+subprojects/libpng*
+subprojects/libvorbis-*
+subprojects/packagecache
+subprojects/SFML-*
