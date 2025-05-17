@@ -25,7 +25,7 @@ runval: all
 
 install:
 	@echo "NEED SUDO FOR INSTALLATION"
-	@sudo apt install libopenal-dev
+	@sudo apt install libopenal-dev libudev-dev
 
 fullinstall: install
 	@sudo apt-get install libsfml-dev
